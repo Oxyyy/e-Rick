@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js')
-const { blue } = require('C:/Users/petit/Desktop/e-Rick/colours.json')
+const { blue } = require('../colours.json')
 const fetch = require('node-fetch');
 
 module.exports = {
@@ -32,7 +32,7 @@ module.exports = {
         catch(error)    {
             // console.log(error)
             msg.delete()
-            message.reply('je sais pas! (il faut pas que le titre contienne d\'accents si ça peut aider)')
+            message.reply('je sais pas!')
             //message.channel.send(`\`${error.name} : ${error.message}\``)
         }
         

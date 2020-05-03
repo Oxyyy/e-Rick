@@ -1,3 +1,17 @@
+const http = require('http');
+const express = require('express');
+const app = express();
+app.get("/", (request, response) => {
+  console.log(Date.now() + " Ping Received");
+  response.sendStatus(200);
+});
+app.listen(process.env.PORT);
+setInterval(() => {
+  http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
+}, 280000);
+
+// test
+
 const fs = require('fs');
 const Discord = require('discord.js');
 const { prefix, token, masterID } = require('./config.json');
@@ -27,7 +41,7 @@ client.once('ready', () => {
     console.log("Connected as " + client.user.tag);
     var generalChannel = client.channels.cache.get("705039359354732645") // Replace with known channel ID
     generalChannel.send("Connected " + "(" + date + " " + time + ")")
-    client.user.setActivity("Le Sanctuaire", { type: "WATCHING" })
+    client.user.setActivity("le Sanctuaire", { type: "WATCHING" })
 });
 
 client.on('guildMemberUpdate', (oldMember, newMember) => {
