@@ -1,4 +1,4 @@
-const config = require('C:/Users/petit/Desktop/e-Rick/config.json');
+const config = require('../config.json');
 const fetch = require('node-fetch');
 const { MessageEmbed } = require('discord.js')
 const { blue } = require('../colours.json')

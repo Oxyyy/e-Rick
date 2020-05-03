@@ -5,7 +5,7 @@ module.exports = {
     cooldown: 10,
     aliases: ['son'],
         execute(message, args) {
-            const localfileAttachment = new Discord.MessageAttachment('C:/Users/petit/Desktop/e-Rick/images/winningson.png')
+            const localfileAttachment = new Discord.MessageAttachment('./images/winningson.png')
             message.channel.send(localfileAttachment)
 
 

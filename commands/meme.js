@@ -1,5 +1,5 @@
 const { MessageEmbed } = require('discord.js')
-const { blue } = require('C:/Users/petit/Desktop/e-Rick/colours.json')
+const { blue } = require('../colours.json')
 const fetch = require('node-fetch');
 
 module.exports = {
