@@ -70,6 +70,8 @@ client.on('message', message => {
         return message.reply('Cette commande ne peut pas être exécutée en DMs!');
     }
 
+    if (command.wip) return message.reply('cette commande n\'est pas finie!')
+
     if (command.args && !args.length) { // check les arguments | donne l'usage standard
         let reply = `Il manque des arguments, ${message.author}!`;
 
@@ -93,6 +95,7 @@ client.on('message', message => {
             return;
         }
     }
+
 
     const now = Date.now();
     const timestamps = cooldowns.get(command.name);
