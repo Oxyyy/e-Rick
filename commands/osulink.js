@@ -13,7 +13,7 @@ module.exports = {
         return message.reply("votre compte n'est pas lié!");
       } else {
         message.channel.send(
-          `Votre compte est lié à l\'ID suivant: \`${Object.values(
+          `Votre compte est lié à l\'osu! ID suivant: \`${Object.values(
             db.get(message.author.id)
           )}\``
         );

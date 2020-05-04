@@ -12,10 +12,10 @@ setInterval(() => {
 
 const fs = require('fs');
 const Discord = require('discord.js');
-var { masterID2, UTCincrement, prefix, token, masterID, logChannelID } = require('./config.json');
+var { welcomeChannelID, masterID2, UTCincrement, prefix, token, masterID, logChannelID } = require('./config.json');
 
 logChannelID = logChannelID.toString()
-
+welcomeChannelID = welcomeChannelID.toString()
 
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
@@ -58,7 +58,7 @@ client.on('guildMemberUpdate', (oldMember, newMember) => {
 client.on('message', message => {
     if (!message.content.startsWith(prefix) || message.author.bot) return;
     console.log(message.content)
-    logChannelID.send(`\`Command received: ${message.content}\``)
+    logChannelID.send(`\`Command received (author: ${message.author.tag}): ${message.content}\``)
 
     const args = message.content.slice(prefix.length).split(/ +/);
     const commandName = args.shift().toLowerCase();
@@ -68,12 +68,22 @@ client.on('message', message => {
 
     if (!command) return;
 
-    if (command.admin && !message.author.id.includes(masterID)) 
-    switch (true) {
-        case !message.author.id.includes(masterID2):
-            message.reply('accès refusé!')
-            break;
+    if (command.admin && !message.author.id.includes(masterID)) {
+        switch (true) {
+            case !message.author.id.includes(masterID2):
+                return message.reply('accès refusé!')
+                break;
+        }
     }
+
+    if (command.channelLimit) {    
+        if (message.channel.id != command.channelLimit) {
+            let appropriateChannelID = command.channelLimit.toString()
+            appropriateChannelName = client.channels.cache.get(`${appropriateChannelID}`)
+            return message.channel.send(`Cette commande ne peut pas être utilisée ici! Channel approprié: ${appropriateChannelName}`)
+        }      
+    }
+    
 
     if (command.guildOnly && message.channel.type !== 'text') { // check si la commande est exécutée en DM
         return message.reply('Cette commande ne peut pas être exécutée en DMs!');
