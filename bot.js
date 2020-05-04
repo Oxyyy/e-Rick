@@ -10,15 +10,18 @@ setInterval(() => {
   http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
 }, 280000);
 
+
 // test
 
 const fs = require('fs');
 const Discord = require('discord.js');
-const { prefix, token, masterID } = require('./config.json');
+var { UTCincrement, prefix, token, masterID, logChannelID } = require('./config.json');
+
+logChannelID = logChannelID.toString()
+
 
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
-
 
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 const cooldowns = new Discord.Collection();
@@ -33,31 +36,33 @@ for (const file of commandFiles) {
 
 var today = new Date();
 var date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate();
-var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+var hours = today.getHours()+UTCincrement
+var time = hours + ":" + today.getMinutes() + ":" + today.getSeconds();
 
 
 
 client.once('ready', () => {
     console.log("Connected as " + client.user.tag);
-    var generalChannel = client.channels.cache.get("705039359354732645") // Replace with known channel ID
-    generalChannel.send("Connected " + "(" + date + " " + time + ")")
+    logChannelID = client.channels.cache.get(logChannelID) // Replace with known channel ID
+    logChannelID.send(`\`Restarted: ${date} ${time}\``)
     client.user.setActivity("le Sanctuaire", { type: "WATCHING" })
 });
 
 client.on('guildMemberUpdate', (oldMember, newMember) => {
 	// If the role(s) are present on the old member object but no longer on the new one (i.e role(s) were removed)
     const removedRoles = oldMember.roles.cache.filter(role => !newMember.roles.cache.has(role.id));
-    const logChannel = client.channels.cache.get('705481214735286282');
 
-	if (removedRoles.size > 0) logChannel.send(`The roles ${removedRoles.map(r => r.name)} were removed from ${oldMember.displayName}.`);
+	if (removedRoles.size > 0) logChannelID.send(`\`The roles ${removedRoles.map(r => r.name)} were removed from ${oldMember.displayName}.\``);
 	// If the role(s) are present on the new member object but are not on the old one (i.e role(s) were added)
 	const addedRoles = newMember.roles.cache.filter(role => !oldMember.roles.cache.has(role.id));
-	if (addedRoles.size > 0) logChannel.send(`The roles ${addedRoles.map(r => r.name)} were added to ${oldMember.displayName}.`);
+	if (addedRoles.size > 0) logChannelID.send(`\`The roles ${addedRoles.map(r => r.name)} were added to ${oldMember.displayName}.\``);
 });
 
 client.on('message', message => {
     if (!message.content.startsWith(prefix) || message.author.bot) return;
     console.log(message.content)
+    logChannelID.send(`\`Command received: ${message.content}\``)
+
     const args = message.content.slice(prefix.length).split(/ +/);
     const commandName = args.shift().toLowerCase();
 
@@ -146,23 +151,20 @@ client.on('message', message => {
 });
 
 client.on('messageDelete', message => {
-    const logChannel = client.channels.cache.get('705481214735286282');
-	logChannel.send(`A message by ${message.author.tag} was deleted.`);
+    if (message.author.tag === 'e-Rick#4612') return;
+	logChannelID.send(`\`A message by ${message.author.tag} was deleted.\``);
 });
 
 client.on('guildBanAdd', async (guild, user) => {
-    const logChannel = client.channels.cache.get('705481214735286282');
-	logChannel.send(`${user.tag} got banned from ${guild.name}.`);
+	logChannelID.send(`\`${user.tag} got banned from ${guild.name}.\``);
 });
 
 client.on('guildBanRemove', async (guild, user) => {
-    const logChannel = client.channels.cache.get('705481214735286282');
-	logChannel.send(`${user.tag} got unbanned from ${guild.name}.`);
+	logChannelID.send(`\`${user.tag} got unbanned from ${guild.name}.\``);
 });
 
 client.on('guildMemberRemove', member => {
-    const logChannel = client.channels.cache.get('705481214735286282');
-	logChannel.send(`${member.user.tag} got kicked.`);
+	logChannelID.send(`\`${member.user.tag} got kicked.\``);
 });
 
 client.login(token);
