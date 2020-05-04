@@ -10,9 +10,6 @@ setInterval(() => {
   http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
 }, 280000);
 
-
-// test
-
 const fs = require('fs');
 const Discord = require('discord.js');
 var { UTCincrement, prefix, token, masterID, logChannelID } = require('./config.json');
