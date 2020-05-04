@@ -12,7 +12,7 @@ setInterval(() => {
 
 const fs = require('fs');
 const Discord = require('discord.js');
-var { UTCincrement, prefix, token, masterID, logChannelID } = require('./config.json');
+var { masterID2, UTCincrement, prefix, token, masterID, logChannelID } = require('./config.json');
 
 logChannelID = logChannelID.toString()
 
@@ -67,6 +67,13 @@ client.on('message', message => {
         || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
     if (!command) return;
+
+    if (command.admin && !message.author.id.includes(masterID)) 
+    switch (true) {
+        case !message.author.id.includes(masterID2):
+            message.reply('accès refusé!')
+            break;
+    }
 
     if (command.guildOnly && message.channel.type !== 'text') { // check si la commande est exécutée en DM
         return message.reply('Cette commande ne peut pas être exécutée en DMs!');
