@@ -15,7 +15,7 @@ module.exports = {
       await msg.edit (':warning: `e-Rick va redémarrer dans 1 secondes...`');
     }, 2000);
     setTimeout (async function () {
-      await msg.edit (':warning: `redémarrage!` :sunglasses:');
+      await msg.edit (':sunglasses: `redémarrage!`');
       return process.exit (22);
     }, 3000);
   },

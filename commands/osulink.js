@@ -5,7 +5,7 @@ module.exports = {
   description: "Allows to link your osu! account to e-Rick",
   aliases: ["link"],
   args: true,
-  usage: "<UserID>",
+  usage: "<LE PSEUDO OSU OU L'ID OSU LA PUTAIN DE TA RACE>",
   cooldown: 5,
   async execute(message, args) {
     if (args[0] === "-check") {

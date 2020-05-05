@@ -2,6 +2,7 @@ dependencies:
   discord.js: 12.2.0
   express: 4.17.1
   jsonfile: 6.0.1
+  markovchain: 1.0.2
   node-fetch: 2.6.0
   node-osu: 2.2.0
   nodesu: 0.7.2
@@ -524,6 +525,14 @@ packages:
     dev: false
     resolution:
       integrity: sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
+  /markovchain/1.0.2:
+    dependencies:
+      pick-one-by-weight: 1.0.2
+    dev: false
+    engines:
+      node: '>=0.8'
+    resolution:
+      integrity: sha1-WLOGQ/tgk81bYkVbex57v+VtflM=
   /media-typer/0.3.0:
     dev: false
     engines:
@@ -703,6 +712,10 @@ packages:
     dev: false
     resolution:
       integrity: sha1-32BBeABfUi8V60SQ5yR6G/qmf4w=
+  /pick-one-by-weight/1.0.2:
+    dev: false
+    resolution:
+      integrity: sha1-+giTJ2yEjIt90vRG6Z+J2DxM7oY=
   /prebuild-install/5.3.3:
     dependencies:
       detect-libc: 1.0.3
@@ -1114,6 +1127,7 @@ specifiers:
   discord.js: ^12.2.0
   express: ^4.17.1
   jsonfile: ^6.0.1
+  markovchain: ^1.0.2
   node-fetch: ^2.6.0
   node-osu: ^2.2.0
   nodesu: ^0.7.2
