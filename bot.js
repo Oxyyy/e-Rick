@@ -193,7 +193,11 @@ client.on("message", (message) => {
     return;
   }
   if (message.content.includes(client.user.id)) {
-    markov.execute(message);
+    RNGMarkov = Math.floor(Math.random() * (RNGMarkovOccurence/20)); 
+    RNGMarkov2 = Math.floor(Math.random() * (RNGMarkovOccurence/20)); 
+    if (RNGMarkov === RNGMarkov2) {
+      markov.execute(message);
+    } 
   }
   RNGMarkov = Math.floor(Math.random() * RNGMarkovOccurence); 
   RNGMarkov2 = Math.floor(Math.random() * RNGMarkovOccurence); 
@@ -202,7 +206,11 @@ client.on("message", (message) => {
   } 
   messageLowCase = message.content.toLowerCase()
   if (messageLowCase.includes('e-rick')){
-    markov.execute(message);
+    RNGMarkov = Math.floor(Math.random() * (RNGMarkovOccurence/20)); 
+    RNGMarkov2 = Math.floor(Math.random() * (RNGMarkovOccurence/20)); 
+    if (RNGMarkov === RNGMarkov2) {
+      markov.execute(message);
+    } 
   } 
   
 });
