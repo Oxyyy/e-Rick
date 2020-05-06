@@ -2,7 +2,7 @@ module.exports = {
   name: 'shutdown',
   description: 'kills the bot',
   admin: true,
-  aliases: ['reboot', 'kill', 'stop', 'sd', 'refresh', 'reset'],
+  aliases: ['reboot', 'kill', 'stop', 'sd', 'refresh', 'reset', 's'],
   cooldown: 10,
   async execute (message) {
     let msg = await message.channel.send (
