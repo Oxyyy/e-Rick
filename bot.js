@@ -21,8 +21,9 @@ var {
   token,
   masterID,
   logChannelID,
-  debugChannelID
+  debugChannelID,
 } = require("./config.json");
+const db = require("quick.db");
 
 logChannelID = logChannelID.toString();
 welcomeChannelID = welcomeChannelID.toString();
@@ -196,6 +197,15 @@ client.on("message", (message) => {
   if (message.author == client.user) {
     return;
   }
+
+  if (message.content.includes("https://osu.ppy.sh/beatmapsets/")) {
+    if (message.channel.id.includes("702628237791985674")) {
+      let recentMapID = message.content.split("/");
+      recentMapID = parseFloat(recentMapID[5]);
+      db.set("most recent map", { recentMap: recentMapID });
+    }
+  }
+
   if (message.content.includes(client.user.id)) {
     RNGMarkov = Math.floor(Math.random() * (RNGMarkovOccurence / 100));
     RNGMarkov2 = Math.floor(Math.random() * (RNGMarkovOccurence / 100));

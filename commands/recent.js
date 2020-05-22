@@ -12,6 +12,10 @@ const db = require("quick.db");
 
 const numberFormat = require("../functions/numberFormat.js")
 const lengthFormat = require("../functions/lengthFormat.js")
+const dateFormat = require("../functions/dateFormat.js")
+const modFormat = require("../functions/modFormat.js")
+const rankingColor = require("../functions/rankingColor.js")
+const rankingIcon = require("../functions/rankingIcon.js")
 
 const osu = require("ojsama");
 let execOjsama = require("child_process").exec;
@@ -30,8 +34,8 @@ module.exports = {
   async execute(message, args) {
     try {
       let userID;
-      if (!args.length) {
-        if (!db.get(message.author.id))
+      if (!args.length) { // checking if the player exists in the local database
+        if (!db.get(message.author.id)) 
           return message.reply(
             "vous devez link votre compte osu, plus d'infos avec `;help osulink`"
           );
@@ -39,15 +43,16 @@ module.exports = {
         userID = Object.values(userID);
       } else userID = args[0];
 
-      let msg = await message.channel.send(`\`Récupération des données.\``);
+      let msg = await message.channel.send(`\`Récupération des données.\``); // loading message
       setTimeout(async function () {
         await msg.edit(`\`Récupération des données..\``);
       }, 1000);
       setTimeout(async function () {
         await msg.edit(`\`Récupération des données...\``);
       }, 2000);
+
       let argMode = "osu";
-      if (args.length > 1) {
+      if (args.length > 1) { // flemme de faire les autres modes mdr
         switch (args[1]) {
           case "mania":
             argMode = "mania";
@@ -74,14 +79,13 @@ module.exports = {
             return message.reply("argument invalide!"), msg.delete();
         }
       }
-      // console.log(argMode);
 
       const recentData = osuApi
         .getUserRecent({ u: userID })
         .then((recentData) => {
-          if (recentData[0] === undefined)
+          if (recentData[0] === undefined) // checking recent scores for the player
             return (
-              message.reply("ce joueur n'a pas joué ces dernières 24h!"),
+              message.reply("ce joueur n'a pas joué ces dernières 24h!"), 
               msg.delete()
             );
           const userData = osuApi
@@ -105,108 +109,38 @@ module.exports = {
 
               let scoreAccuracy = (recentData[0].accuracy * 100).toFixed(2);
 
-              let rankingIcon = "noRank"; // traduit le rank obtenu en icône à afficher
-              var embedColor;
-              switch (recentData[0].rank) {
-                case "A":
-                  rankingIcon = `https://cdn.discordapp.com/attachments/612312867139616769/706131770419970069/Ranking-A2x.png`;
-                  embedColor = "#13ae58";
-                  break;
-                case "B":
-                  rankingIcon = `https://cdn.discordapp.com/attachments/612312867139616769/706131771619672095/Ranking-B2x.png`;
-                  embedColor = "#136fc4";
-                  break;
-                case "C":
-                  rankingIcon = `https://cdn.discordapp.com/attachments/612312867139616769/706131773893115934/Ranking-C2x.png`;
-                  embedColor = "#6a14bc";
-                  break;
-                case "D":
-                  rankingIcon = `https://cdn.discordapp.com/attachments/612312867139616769/706131768511692810/Ranking-D2x.png`;
-                  embedColor = "#a91313";
-                  break;
-                case "S":
-                  rankingIcon = `https://cdn.discordapp.com/attachments/612312867139616769/706131769610731520/Ranking-S2x.png`;
-                  embedColor = "#bc8c13";
-                  break;
-                case "SH":
-                  rankingIcon = `https://cdn.discordapp.com/attachments/612312867139616769/706131824178495528/ranking-SH2x.png`;
-                  embedColor = "#9a9a9a";
-                  break;
-                case "X":
-                  rankingIcon = `https://cdn.discordapp.com/attachments/612312867139616769/706131826342756423/Ranking-X2x.png`;
-                  embedColor = "#bc8c13";
-                  break;
-                case "XH":
-                  rankingIcon = `https://cdn.discordapp.com/attachments/612312867139616769/706131827466829874/ranking-XH2x.png`;
-                  embedColor = "#9a9a9a";
-                  break;
-                default:
-                  (rankingIcon = `https://cdn.discordapp.com/attachments/612312867139616769/706551337332244480/deaddeathgravegraveyardhalloweenscaryicon-1320183477745266883.png`),
-                    (embedColor = "#f51007");
-              }
-              // console.log(recentData[0].mods)
+              let rankObtained = recentData[0].rank // parse the obtained rank
+              let rankingIco = rankingIcon.execute(rankObtained) // retrieve the ranking icon using a custom function
+              let rankingColo = rankingColor.execute(rankObtained) // retrieve the embed's color using a custom function 
 
-              let enabledMods = recentData[0].mods.join("");
-              if (enabledMods === "") {
-                enabledMods = "NM";
-              }
-              enabledMods = enabledMods.replace("None", "NM");
-              enabledMods = enabledMods.replace("NoFail", "NF");
-              enabledMods = enabledMods.replace("Easy", "EZ");
-              enabledMods = enabledMods.replace("TouchDevice", "TD");
-              enabledMods = enabledMods.replace("Hidden", "HD");
-              enabledMods = enabledMods.replace("HardRock", "HR");
-              enabledMods = enabledMods.replace("SuddenDeath", "SD");
-              enabledMods = enabledMods.replace("DoubleTime", "DT");
-              enabledMods = enabledMods.replace("Relax", "RX");
-              enabledMods = enabledMods.replace("HalfTime", "HT");
-              enabledMods = enabledMods.replace("Nightcore", "NC");
-              enabledMods = enabledMods.replace("Flashlight", "FL");
-              enabledMods = enabledMods.replace("Autoplay", "Auto");
-              enabledMods = enabledMods.replace("SpunOut", "SO");
-              enabledMods = enabledMods.replace("Relax2", "AP");
-              enabledMods = enabledMods.replace("Perfect", "PF");
-              enabledMods = enabledMods.replace("Key4", "4K");
-              enabledMods = enabledMods.replace("Key5", "5K");
-              enabledMods = enabledMods.replace("Key6", "6K");
-              enabledMods = enabledMods.replace("Key7", "7K");
-              enabledMods = enabledMods.replace("Key8", "8K");
-              enabledMods = enabledMods.replace("FreeModAllowed", "");
-              enabledMods = enabledMods.replace("ScoreIncreaseMods", "");
+              let enabledMods = recentData[0].mods.join(""); // mods formatting using a custom function
+              let formattedMods = modFormat.execute(enabledMods)
 
               let raw_bpm = recentData[0]._beatmap.bpm;
-              raw_bpm = raw_bpm.toFixed();
+              raw_bpm = raw_bpm.toFixed(); // rounding bpm
               let rawLength = recentData[0]._beatmap["length"].total;
-              if (enabledMods.includes("DT" || "NC")) {
+              if (formattedMods.includes("DT" || "NC")) { // edit bpm/length if DT/NC 
                 rawLength /= 1.5;
                 rawLength = rawLength.toFixed();
                 raw_bpm *= 1.5;
                 raw_bpm = raw_bpm.toFixed();
               }
 
-              let formattedLength = lengthFormat.execute(rawLength)
+              let formattedLength = lengthFormat.execute(rawLength) // length formatting using a custom function
 
-              let approvalDate = recentData[0]._beatmap.raw_approvedDate.slice(
+              let approvalDate = recentData[0]._beatmap.raw_approvedDate.slice( // parse approval date
                 0,
                 7
               );
-              let scoreDate = recentData[0].raw_date.slice(5, 16);
-              let minuteScore = scoreDate.slice(8, 11);
-              let hourScore =
-                parseFloat(scoreDate.slice(6, 8)) + config.UTCincrement;
-              if (hourScore >= 24) {
-                hourScore -= 24;
-              }
-              hourScore = hourScore.toString();
-              scoreDate = scoreDate.slice(0, 6);
-              let scoreTime = hourScore + minuteScore;
-              scoreDate = scoreDate + scoreTime;
+
+              let scoreDate = recentData[0].raw_date.slice(5, 16); // date formatting using a custom function
+              let formattedDate = dateFormat.execute(scoreDate)
 
               let rawNumber = userData.pp.rank; // rank formatting using a custom function
               formattedRank = numberFormat.execute(rawNumber)
 
               execOjsama(
-                `curl https://osu.ppy.sh/osu/${recentData[0]._beatmap.id} | node ojsama.js +${enabledMods} ${scoreAccuracy}% ${recentData[0].maxCombo}x ${countMiss}m`,
+                `curl https://osu.ppy.sh/osu/${recentData[0]._beatmap.id} | node ojsama.js +${formattedMods} ${scoreAccuracy}% ${recentData[0].maxCombo}x ${countMiss}m`, // parse actual score performance
                 async function (error, stdout, stderr) {
                   const ojsamaData = stdout;
                   const formattedOJData = ojsamaData.split("\n");
@@ -224,10 +158,8 @@ module.exports = {
                     pprecentData = pprecentData.toString();
                   }
 
-                  // console.log(formattedOJData);
-
                   execOjsama(
-                    `curl https://osu.ppy.sh/osu/${recentData[0]._beatmap.id} | node ojsama.js +${enabledMods} ${scoreAccuracy}%`,
+                    `curl https://osu.ppy.sh/osu/${recentData[0]._beatmap.id} | node ojsama.js +${formattedMods} ${scoreAccuracy}%`, // parse score performance if FC
                     async function (error, stdout, stderr) {
                       const ojsamaData2 = stdout;
                       const formattedOJData2 = ojsamaData2.split("\n");
@@ -245,9 +177,8 @@ module.exports = {
                         ppFCData = ppFCData.toString();
                       }
 
-                      //  console.log(`PP for FC: ${ppFCData}`);
                       execOjsama(
-                        `curl https://osu.ppy.sh/osu/${recentData[0]._beatmap.id} | node ojsama.js +${enabledMods}`,
+                        `curl https://osu.ppy.sh/osu/${recentData[0]._beatmap.id} | node ojsama.js +${formattedMods}`, // parse score performance if SS
                         async function (error, stdout, stderr) {
                           const ojsamaData3 = stdout;
                           const formattedOJData3 = ojsamaData3.split("\n");
@@ -264,9 +195,8 @@ module.exports = {
                             ppSSData = parseFloat(ppSSData[0]).toFixed();
                             ppSSData = ppSSData.toString();
                           }
-                          //  console.log(`PP for SS: ${ppSSData}`);
 
-                          let ppEmbed;
+                          let ppEmbed; // detect if it's an fc 
                           if (
                             recentData[0].maxCombo >=
                             recentData[0]._beatmap.maxCombo - 10
@@ -274,22 +204,22 @@ module.exports = {
                             ppEmbed = `**${ppSSData}pp if SS**`;
                           } else ppEmbed = `**${ppFCData}pp if FC**`;
 
-                          // console.log(recentData[0])
-
-                          let embed = new MessageEmbed()
-                            .setColor(embedColor)
+                          let embed = new MessageEmbed() // setting up the final embed
+                            .setColor(rankingColo)
                             .setTitle(
-                              `${recentData[0]._beatmap.artist} - ${recentData[0]._beatmap.title} [${recentData[0]._beatmap.version}] +${enabledMods}`
+                              `${recentData[0]._beatmap.artist} - ${recentData[0]._beatmap.title} [${recentData[0]._beatmap.version}] +${formattedMods}`
                             )
                             .setImage(
                               `https://assets.ppy.sh/beatmaps/${recentData[0]._beatmap.beatmapSetId}/covers/cover.jpg?1547927639`
                             )
-                            .setThumbnail(rankingIcon)
+                            .setThumbnail(rankingIco)
                             .setURL(
                               `https://osu.ppy.sh/beatmapsets/${recentData[0]._beatmap.beatmapSetId}#osu/${recentData[0]._beatmap.id}`
                             )
                             .setFooter(
-                              `${scoreDate} | ${recentData[0]._beatmap.creator} | ${recentData[0]._beatmap.approvalStatus} (${approvalDate}) | ${srData}★ | ${formattedLength} | ${raw_bpm}BPM`
+                              `| ${formattedDate} | ${recentData[0]._beatmap.creator} | ${recentData[0]._beatmap.approvalStatus} (${approvalDate}) | ${srData}★ | ${formattedLength} | ${raw_bpm}BPM`,
+                              `https://osu.ppy.sh/images/flags/${userData.country}.png`
+
                             )
                             .setAuthor(
                               `Most recent score of ${userData.name} (#${formattedRank})`,
@@ -314,6 +244,7 @@ module.exports = {
                               }
                             );
                           msg.delete(); // delete le message de chargement
+                          db.set("most recent map", { recentMap: recentData[0]._beatmap.id });
                           message.channel.send(embed); // envoi du score
                         }
                       );
