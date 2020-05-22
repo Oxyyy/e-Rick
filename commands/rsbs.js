@@ -6,6 +6,7 @@ module.exports = {
     name: 'rsbs',
     description: 'rs pour mirthille (beatsaber)',
     cooldown: 5,
+    channelLimit: '702628237791985674',
     async execute(message) {
         const data = await fetch(`https://new.scoresaber.com/api/player/76561198065389085/scores/recent`)
         .then(res => res.json())

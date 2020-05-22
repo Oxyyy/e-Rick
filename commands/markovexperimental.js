@@ -62,6 +62,7 @@ module.exports = {
       chain = chain.replace('osu! official server', '')
       chain = chain.replace('osu!', '')
       chain = chain.replace('recent', '')
+      chain = chain.replace('@everyone', '')
       msg.delete()
       message.channel.send(chain);
     ;

@@ -15,6 +15,7 @@ module.exports = {
       channelFetch = channelFetch.filter(word => !word.includes('http'))
       channelFetch = channelFetch.filter(word => !word.includes('<@'))
       channelFetch = channelFetch.filter(word => !word.includes('e-rick'))
+      channelFetch = channelFetch.filter(word => !word.includes('@'))
       let formattedMsg = channelFetch.join(' ')
       formattedMsg = (Object.values(channelFetch)).toString()
       formattedMsg = formattedMsg.replace(/,/g, ' ')
@@ -22,7 +23,8 @@ module.exports = {
 
 
       const quotes = new MarkovChain(formattedMsg);
-      const chain = quotes.end(10).process()
+      let chain = quotes.end(10).process()
+      chain = chain.replace('@everyone', '')
       message.channel.send(chain);
 
     });

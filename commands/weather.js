@@ -70,6 +70,8 @@ module.exports = {
                     else {
                         windDirection = 'Inconnue'
                     }
+
+                    let windSpeed = (body.wind.speed*3.6).toFixed()
                     
                     let msg = await message.channel.send('Chargement des données...')
                     let embed = new MessageEmbed()
@@ -80,7 +82,7 @@ module.exports = {
                             { name: 'Description:', value: `${body.weather[0].description}` },
                             // { name: '\u200B', value: '\u200B' },
                             { name: 'Température:', value: `${body.main.temp}°C (${body.main.feels_like}°C ressentis)`, inline: true },
-                            { name: 'Vent:', value: `${body.wind.speed*3.6}km/h (Direction: ${windDirection})`, inline: true },
+                            { name: 'Vent:', value: `${windSpeed}km/h (Direction: ${windDirection})`, inline: true },
                         )
                         .setTitle(`Données météorologiques:`)
                         .setTimestamp()

@@ -21,6 +21,7 @@ var {
   token,
   masterID,
   logChannelID,
+  debugChannelID
 } = require("./config.json");
 
 logChannelID = logChannelID.toString();
@@ -111,18 +112,21 @@ client.on("message", (message) => {
   }
 
   if (command.channelLimit) {
-    if (!command.debug) {
-      if (
-        message.channel.id != command.channelLimit &&
-        message.channel.type === "text"
-      ) {
-        let appropriateChannelID = command.channelLimit.toString();
-        appropriateChannelName = client.channels.cache.get(
-          `${appropriateChannelID}`
-        );
-        return message.channel.send(
-          `Cette commande ne peut pas être utilisée ici! Channel approprié: ${appropriateChannelName}`
-        );
+    if (message.channel.id !== debugChannelID) {
+      // console.log(message.channel.id);
+      if (!command.debug) {
+        if (
+          message.channel.id != command.channelLimit &&
+          message.channel.type === "text"
+        ) {
+          let appropriateChannelID = command.channelLimit.toString();
+          appropriateChannelName = client.channels.cache.get(
+            `${appropriateChannelID}`
+          );
+          return message.channel.send(
+            `Cette commande ne peut pas être utilisée ici! Channel approprié: ${appropriateChannelName}`
+          );
+        }
       }
     }
   }
@@ -193,43 +197,26 @@ client.on("message", (message) => {
     return;
   }
   if (message.content.includes(client.user.id)) {
-    RNGMarkov = Math.floor(Math.random() * (RNGMarkovOccurence/20)); 
-    RNGMarkov2 = Math.floor(Math.random() * (RNGMarkovOccurence/20)); 
+    RNGMarkov = Math.floor(Math.random() * (RNGMarkovOccurence / 100));
+    RNGMarkov2 = Math.floor(Math.random() * (RNGMarkovOccurence / 100));
     if (RNGMarkov === RNGMarkov2) {
       markov.execute(message);
-    } 
+    }
   }
-  RNGMarkov = Math.floor(Math.random() * RNGMarkovOccurence); 
-  RNGMarkov2 = Math.floor(Math.random() * RNGMarkovOccurence); 
+  RNGMarkov = Math.floor(Math.random() * RNGMarkovOccurence);
+  RNGMarkov2 = Math.floor(Math.random() * RNGMarkovOccurence);
   if (RNGMarkov === RNGMarkov2) {
     markov.execute(message);
-  } 
-  messageLowCase = message.content.toLowerCase()
-  if (messageLowCase.includes('e-rick')){
-    RNGMarkov = Math.floor(Math.random() * (RNGMarkovOccurence/20)); 
-    RNGMarkov2 = Math.floor(Math.random() * (RNGMarkovOccurence/20)); 
+  }
+  messageLowCase = message.content.toLowerCase();
+  if (messageLowCase.includes("e-rick")) {
+    RNGMarkov = Math.floor(Math.random() * (RNGMarkovOccurence / 100));
+    RNGMarkov2 = Math.floor(Math.random() * (RNGMarkovOccurence / 100));
     if (RNGMarkov === RNGMarkov2) {
       markov.execute(message);
-    } 
-  } 
-  
+    }
+  }
 });
-//     if (message.content.includes("d-_-b")) {
-//         message.channel.send("d-_-b")
-//     }
-//     if (message.content.includes("oui d'accord")) {
-//         message.channel.send("tg " + message.author.toString())
-//     }
-//     if (message.content.includes("btg")) {
-//         message.channel.send("tg " + message.author.toString())
-//     }
-//     if (message.content.includes("cringe")) {
-//         message.channel.send("c'est toi qui est cringe " + message.author.toString())
-//     }
-//     if (message.content.includes("menfou")) {
-//         message.channel.send("moi aussi menfou")
-//     }
-// });
 
 client.on("messageDelete", (message) => {
   if (message.author.tag === "e-Rick#4612") return;
