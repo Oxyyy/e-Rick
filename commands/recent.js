@@ -9,21 +9,21 @@ const osuApi = new tigrou.Api(config.osuToken, {
   notFoundAsError: false,
 });
 const db = require("quick.db");
+const moment = require("moment");
 
-const numberFormat = require("../functions/numberFormat.js")
-const lengthFormat = require("../functions/lengthFormat.js")
-const dateFormat = require("../functions/dateFormat.js")
-const modFormat = require("../functions/modFormat.js")
-const rankingColor = require("../functions/rankingColor.js")
-const rankingIcon = require("../functions/rankingIcon.js")
+const numberFormat = require("../functions/numberFormat.js");
+const lengthFormat = require("../functions/lengthFormat.js");
+const dateFormat = require("../functions/dateFormat.js");
+const modFormat = require("../functions/modFormat.js");
+const rankingColor = require("../functions/rankingColor.js");
+const rankingIcon = require("../functions/rankingIcon.js");
 
 const osu = require("ojsama");
 let execOjsama = require("child_process").exec;
 
 module.exports = {
   name: "recent",
-  description:
-    "Answers with details about the most recent score of a player",
+  description: "Answers with details about the most recent score of a player",
   args: false,
   channelLimit: "702628237791985674",
   debug: false,
@@ -34,8 +34,9 @@ module.exports = {
   async execute(message, args) {
     try {
       let userID;
-      if (!args.length) { // checking if the player exists in the local database
-        if (!db.get(message.author.id)) 
+      if (!args.length) {
+        // checking if the player exists in the local database
+        if (!db.get(message.author.id))
           return message.reply(
             "vous devez link votre compte osu, plus d'infos avec `;help osulink`"
           );
@@ -52,7 +53,8 @@ module.exports = {
       }, 2000);
 
       let argMode = "osu";
-      if (args.length > 1) { // flemme de faire les autres modes mdr
+      if (args.length > 1) {
+        // flemme de faire les autres modes mdr
         switch (args[1]) {
           case "mania":
             argMode = "mania";
@@ -83,9 +85,10 @@ module.exports = {
       const recentData = osuApi
         .getUserRecent({ u: userID })
         .then((recentData) => {
-          if (recentData[0] === undefined) // checking recent scores for the player
+          if (recentData[0] === undefined)
+            // checking recent scores for the player
             return (
-              message.reply("ce joueur n'a pas joué ces dernières 24h!"), 
+              message.reply("ce joueur n'a pas joué ces dernières 24h!"),
               msg.delete()
             );
           const userData = osuApi
@@ -109,35 +112,28 @@ module.exports = {
 
               let scoreAccuracy = (recentData[0].accuracy * 100).toFixed(2);
 
-              let rankObtained = recentData[0].rank // parse the obtained rank
-              let rankingIco = rankingIcon.execute(rankObtained) // retrieve the ranking icon using a custom function
-              let rankingColo = rankingColor.execute(rankObtained) // retrieve the embed's color using a custom function 
+              let rankObtained = recentData[0].rank; // parse the obtained rank
+              let rankingIco = rankingIcon.execute(rankObtained); // retrieve the ranking icon using a custom function
+              let rankingColo = rankingColor.execute(rankObtained); // retrieve the embed's color using a custom function
 
               let enabledMods = recentData[0].mods.join(""); // mods formatting using a custom function
-              let formattedMods = modFormat.execute(enabledMods)
+              let formattedMods = modFormat.execute(enabledMods);
 
               let raw_bpm = recentData[0]._beatmap.bpm;
               raw_bpm = raw_bpm.toFixed(); // rounding bpm
               let rawLength = recentData[0]._beatmap["length"].total;
-              if (formattedMods.includes("DT" || "NC")) { // edit bpm/length if DT/NC 
+              if (formattedMods.includes("DT" || "NC")) {
+                // edit bpm/length if DT/NC
                 rawLength /= 1.5;
                 rawLength = rawLength.toFixed();
                 raw_bpm *= 1.5;
                 raw_bpm = raw_bpm.toFixed();
               }
 
-              let formattedLength = lengthFormat.execute(rawLength) // length formatting using a custom function
-
-              let approvalDate = recentData[0]._beatmap.raw_approvedDate.slice( // parse approval date
-                0,
-                7
-              );
-
-              let scoreDate = recentData[0].raw_date.slice(5, 16); // date formatting using a custom function
-              let formattedDate = dateFormat.execute(scoreDate)
+              let formattedLength = lengthFormat.execute(rawLength); // length formatting using a custom function
 
               let rawNumber = userData.pp.rank; // rank formatting using a custom function
-              formattedRank = numberFormat.execute(rawNumber)
+              formattedRank = numberFormat.execute(rawNumber);
 
               execOjsama(
                 `curl https://osu.ppy.sh/osu/${recentData[0]._beatmap.id} | node ojsama.js +${formattedMods} ${scoreAccuracy}% ${recentData[0].maxCombo}x ${countMiss}m`, // parse actual score performance
@@ -196,7 +192,7 @@ module.exports = {
                             ppSSData = ppSSData.toString();
                           }
 
-                          let ppEmbed; // detect if it's an fc 
+                          let ppEmbed; // detect if it's an fc
                           if (
                             recentData[0].maxCombo >=
                             recentData[0]._beatmap.maxCombo - 10
@@ -204,10 +200,24 @@ module.exports = {
                             ppEmbed = `**${ppSSData}pp if SS**`;
                           } else ppEmbed = `**${ppFCData}pp if FC**`;
 
+                          let raw_date1 = recentData[0].raw_date;
+
+                          let timeAgo1 = moment(
+                            raw_date1,
+                            "YYYY-MM-DD HH:mm:SS"
+                          ).fromNow();
+
+                          let approvalDate =
+                            recentData[0]._beatmap.raw_approvedDate;
+                          approvalDate = moment(
+                            approvalDate,
+                            "YYYY-MM-DD HH:mm:SS"
+                          ).fromNow();
+
                           let embed = new MessageEmbed() // setting up the final embed
                             .setColor(rankingColo)
                             .setTitle(
-                              `${recentData[0]._beatmap.artist} - ${recentData[0]._beatmap.title} [${recentData[0]._beatmap.version}] +${formattedMods}`
+                              `${recentData[0]._beatmap.artist} - ${recentData[0]._beatmap.title} [${recentData[0]._beatmap.version}] +${formattedMods} (${srData}★)`
                             )
                             .setImage(
                               `https://assets.ppy.sh/beatmaps/${recentData[0]._beatmap.beatmapSetId}/covers/cover.jpg?1547927639`
@@ -217,9 +227,7 @@ module.exports = {
                               `https://osu.ppy.sh/beatmapsets/${recentData[0]._beatmap.beatmapSetId}#osu/${recentData[0]._beatmap.id}`
                             )
                             .setFooter(
-                              `| ${formattedDate} | ${recentData[0]._beatmap.creator} | ${recentData[0]._beatmap.approvalStatus} (${approvalDate}) | ${srData}★ | ${formattedLength} | ${raw_bpm}BPM`,
-                              `https://osu.ppy.sh/images/flags/${userData.country}.png`
-
+                              `Set ${timeAgo1} | ${recentData[0]._beatmap.creator} | ${recentData[0]._beatmap.approvalStatus} ${approvalDate} | ${formattedLength} | ${raw_bpm}BPM`
                             )
                             .setAuthor(
                               `Most recent score of ${userData.name} (#${formattedRank})`,
@@ -244,7 +252,9 @@ module.exports = {
                               }
                             );
                           msg.delete(); // delete le message de chargement
-                          db.set("most recent map", { recentMap: recentData[0]._beatmap.id });
+                          db.set("most recent map", {
+                            recentMap: recentData[0]._beatmap.id,
+                          });
                           message.channel.send(embed); // envoi du score
                         }
                       );
