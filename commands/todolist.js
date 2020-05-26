@@ -1,27 +1,22 @@
-const tdl = require('quick.db');
-const { MessageEmbed } = require("discord.js");
+const Discord = require("discord.js");
+const fs = require('fs')
 const { blue } = require('../colours.json')
 
-
 module.exports = {
-    name: 'todolist',
-    description: 'lists the upcoming features of the bot',
-    aliases: ['tdl'],
-    args: false,
+    name: "todolist",
+    aliases: ["tdl"],
 
     async execute(message, args) {
-        toDoList = tdl.get('tdl')
-        toDoList = (Object.values(toDoList)).toString()
-        toDoList = toDoList.replace(/, /g, '\n- ')
-        let embed = new MessageEmbed()
+        var channelFetch = fs.readFileSync("./txt/todolist.txt", "utf8");
+        formattedList = channelFetch.split("|")
+        let embed = new Discord.MessageEmbed()
+
         .setColor(blue)
-        .setDescription(`\`\`\`${toDoList}\`\`\``)
-        .setThumbnail('https://cdn.discordapp.com/attachments/612312867139616769/706918007628365844/1024px-Icon-notepad.png')
+        .setAuthor('To-do list de e-Rick');
+
+        formattedList.forEach(element => {
+            embed.addField(`${formattedList.indexOf(element)+1}.`, `${element}`)           
+        });
         message.channel.send(embed)
-        
-
-
-
-
     }
 }

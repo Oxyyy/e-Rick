@@ -37,25 +37,28 @@ module.exports = {
         );
       userID = db.get(message.author.id); // if yes retrieve the corresponding player in the local database
       userID = Object.values(userID);
-    } else userID = args[0]; // else define the player as the first argument
+    } else userID = args.join('_'); // else define the player as the first argument
 
     let recentMap = db.get("most recent map"); // retrieving the most recent map to check scores for
     recentMap = parseFloat(Object.values(recentMap));
 
     let msg = await message.channel.send(`\`Récupération des données.\``); // loading message
-      setTimeout(async function () {
-        await msg.edit(`\`Récupération des données..\``);
-      }, 1000);
-      setTimeout(async function () {
-        await msg.edit(`\`Récupération des données...\``);
-      }, 2000);
+    setTimeout(async function () {
+      await msg.edit(`\`Récupération des données..\``);
+    }, 1000);
+    setTimeout(async function () {
+      await msg.edit(`\`Récupération des données...\``);
+    }, 2000);
 
     const scoreData = osuApi // parsing scores of the user on the corresponding beatmap
       .getScores({ b: recentMap, u: userID })
       .then((scores) => {
         if (!scores[0])
           // checking if the user has any available score
-          return message.reply("cet utilisateur n'a aucun score sur cette map");
+          return (
+            message.reply("cet utilisateur n'a aucun score sur cette map"),
+            msg.delete()
+          );
         fetch(
           `https://osu.ppy.sh/api/get_scores?k=${apiKey.osuToken}&b=${recentMap}&u=${userID}`
         )
@@ -63,15 +66,11 @@ module.exports = {
           .then(async (body) => {
             let rankObtained = scores[0].rank;
             let embedColor = rankingColor.execute(rankObtained); // retrieving embedcolor depending on the rank of the top score
-
-            let submitCount = 0;
-            scores.forEach((element) => {
-              // counting the amount of submited scores
-              submitCount += 1;
-            });
+            let submitCount = scores.length;
+            
 
             var scoresToCheck = [1, 2]; // setting up the default scores to display in the embed
-
+            
             async function sendEmbed(
               message,
               scores,
@@ -81,6 +80,20 @@ module.exports = {
               // main function that prepares the embed for every page to display
               let totalPages = Math.ceil(submitCount / 2); // calculating the pages to display a page indicator in footer
               let currentPage = scoresToCheck[1] / 2;
+              let pageCounter = "wip";
+
+              if (totalPages !== 1) {
+                pageCounter = `Page ${currentPage} of ${totalPages} (${submitCount} plays)`;
+              } else {
+                if (submitCount == 1) {
+                  pageCounter = `Played once`;
+                } else {
+                  pageCounter = `Played twice`;
+                }
+              }
+              console.log(submitCount)
+              // let isUniqueScore = submitCount == 1
+              // console.log(isUniqueScore)
 
               let mapper = scores[0]._beatmap.creator;
               let approvalStatus = scores[0]._beatmap.approvalStatus;
@@ -103,7 +116,9 @@ module.exports = {
                 .setImage(
                   `https://assets.ppy.sh/beatmaps/${scores[0]._beatmap.beatmapSetId}/covers/cover.jpg?1547927639`
                 )
-                .setFooter(`Page ${currentPage} of ${totalPages} | ${mapper} | ${approvalStatus} ${rankedAgo} | ${mapLength} | ${mapBPM}BPM`)
+                .setFooter(
+                  `${pageCounter} | ${mapper} | ${approvalStatus} ${rankedAgo} | ${mapLength} | ${mapBPM.toFixed()}BPM`
+                )
                 .setTitle(
                   `${scores[0]._beatmap.artist} - ${scores[0]._beatmap.title} [${scores[0]._beatmap.version}]`
                 )
@@ -112,7 +127,7 @@ module.exports = {
                 );
 
               if (scoresToCheck[1] - 1 !== submitCount) {
-                // check if the embed needs to have 2 fields
+                // check if the embed needs to have 2 fields*
 
                 let enabledMods1 = scores[scoresToCheck[0] - 1].mods.join(""); // retrieving enabled mods on both scores
                 enabledMods1 = modFormat.execute(enabledMods1);
@@ -378,7 +393,7 @@ module.exports = {
               scoresToCheck,
               submitCount
             );
-            msg.delete()
+            msg.delete();
             message.channel.send(embed1).then((embedEdit) => {
               // posting the first embed, listening for any reactions after that
               if (Math.ceil(submitCount / 2) >= 2) {
