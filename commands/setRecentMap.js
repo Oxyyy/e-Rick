@@ -1,13 +1,18 @@
-const db = require('quick.db')
+const db = require('quick.db');
 
 module.exports = {
-    name: 'setRecentMap',
-    aliases: ['rsedit'],
-    args: true,
+	name: 'setRecentMap',
+	aliases: [ 'rsedit' ],
+	args: true,
+	admin: true,
 
-    execute(message, args){
-        db.set("most recent map", { recentMap: args[0] });
-        message.channel.send(`Most recent map set to ${args[0]}`)
-    }
-    
-}
+	execute(message, args, fb) {
+		if (args.length !== 1) return message.reply('argument invalide!');
+		let recentMap = parseFloat(args[0]);
+
+		fb.collection('guilds').doc(message.guild.id).update({
+			recentMap: recentMap
+		});
+		message.channel.send(`\`Most recent map set to: ${recentMap}\``);
+	}
+};

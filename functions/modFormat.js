@@ -27,6 +27,8 @@ module.exports = {
           enabledMods = enabledMods.replace("Key8", "8K");
           enabledMods = enabledMods.replace("FreeModAllowed", "");
           enabledMods = enabledMods.replace("ScoreIncreaseMods", "");
+          enabledMods = enabledMods.replace(/,/g, "");
+
 
           if (enabledMods.includes('NC')) {
               enabledMods = enabledMods.replace("DT", "")

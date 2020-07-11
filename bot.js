@@ -10,6 +10,9 @@ setInterval(() => {
   http.get(`http://${process.env.PROJECT_DOMAIN}.glitch.me/`);
 }, 280000);
 
+const masterID = process.env.OWNER;
+const token = process.env.TOKEN;
+
 const fs = require("fs");
 const Discord = require("discord.js");
 var {
@@ -17,19 +20,46 @@ var {
   welcomeChannelID,
   masterID2,
   UTCincrement,
-  prefix,
-  token,
-  masterID,
   logChannelID,
   debugChannelID,
 } = require("./config.json");
 const db = require("quick.db");
+let prefix;
 
 logChannelID = logChannelID.toString();
 welcomeChannelID = welcomeChannelID.toString();
 
+// INITIALIZE DATABASE
+
+const firebase = require('firebase/app');
+const FieldValue = require('firebase-admin').firestore.FieldValue
+const admin = require('firebase-admin')
+const serviceAccount = require('./serviceAccount.json')
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://e-rick-ad9a6.firebaseio.com"
+})
+
+let fb = admin.firestore();
+
+//
+
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
+
+client.on('guildCreate', async gData => {
+  console.log(`New guild joined: ${gData.name}`)
+  fb.collection('guilds').doc(gData.id).set({
+    'guildID' : gData.id,
+    'guildName' : gData.name,
+    'guildOwner' : gData.owner.user.username,
+    'guildOwnerID' : gData.owner.id,
+    'guildMemberCount' : gData.memberCount,
+    'prefix' : '!',
+    'recentMap' : '131891'
+  })
+})
 
 const commandFiles = fs
   .readdirSync("./commands")
@@ -87,8 +117,19 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
 });
 
 client.on("message", (message) => {
-  if (!message.content.startsWith(prefix) || message.author.bot) return;
-  console.log(message.content);
+  let tempGuildID;
+  if (message.channel.type === "dm") {
+    tempGuildID = message.author.tag
+  }
+  else tempGuildID = message.guild.id;
+
+  fb.collection('guilds').doc(tempGuildID).get().then((q) => {
+    if (q.exists) {
+      prefix = q.data().prefix
+    }
+  }).then(()  => {
+    if (!message.content.startsWith(prefix) || message.author.bot) return;
+    console.log(message.content);
   logChannelID.send(
     `\`Command received (author: ${message.author.tag}): ${message.content}\``
   );
@@ -154,7 +195,7 @@ client.on("message", (message) => {
   }
   if (message.author.id === masterID) {
     try {
-      command.execute(message, args); // execute le fichier js correspondant à la commande
+      command.execute(message, args, fb); // execute le fichier js correspondant à la commande
       return;
     } catch (error) {
       console.error(error);
@@ -184,7 +225,7 @@ client.on("message", (message) => {
   timestamps.set(message.author.id, now);
   setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
   try {
-    command.execute(message, args); // execute le fichier js correspondant à la commande
+    command.execute(message, args, fb); // execute le fichier js correspondant à la commande
   } catch (error) {
     console.error(error);
     message.reply(
@@ -192,6 +233,9 @@ client.on("message", (message) => {
     );
   }
 });
+  })
+
+  
 
 client.on("message", (message) => {
   if (message.author == client.user) {
@@ -202,9 +246,16 @@ client.on("message", (message) => {
     if (message.channel.id.includes("702628237791985674")) {
       let recentMapID = message.content.split("/");
       recentMapID = parseFloat(recentMapID[5]);
-      db.set("most recent map", { recentMap: recentMapID });
+      fb.collection('guilds').doc(message.guild.id).update({
+        recentMap: recentMapID
+      })
     }
   }
+
+  if (message.content.includes("quade")) {
+    const attachment = new Discord.MessageAttachment('https://media.tenor.com/images/4121cde2b1e9530a87cbca262812f7ca/tenor.gif')
+      message.channel.send(attachment)
+    }
 
   if (message.content.includes(client.user.id)) {
     RNGMarkov = Math.floor(Math.random() * (RNGMarkovOccurence / 100));
@@ -244,5 +295,6 @@ client.on("guildBanRemove", async (guild, user) => {
 client.on("guildMemberRemove", (member) => {
   logChannelID.send(`\`${member.user.tag} got kicked.\``);
 });
+
 
 client.login(token);

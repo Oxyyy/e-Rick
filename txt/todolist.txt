@@ -1,1 +1,1 @@
-tictactoe|osuquiz|;rs -l
+tictactoe|osuquiz randomized|;rs -l
